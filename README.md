@@ -24,6 +24,34 @@ cc -std=c11 -Wall -Wextra src/main.c -o build/7segment-clock
 
 세 함수는 [원본 C 소스](src/main.c)에 들어 있습니다.
 
+## 회로 로직
+
+십진수 한 자리(0~9)를 4비트 `ABCD`로 입력합니다. `A`가 최상위 비트(8), `D`가 최하위 비트(1)입니다. 출력 `a`~`g` 중 값이 1인 세그먼트를 켭니다.
+
+```text
+   a
+ f   b
+   g
+ e   c
+   d
+```
+
+`logic`은 아래 C 논리식으로 각 출력을 계산합니다. `!`는 NOT, `&&`는 AND, `||`는 OR, `^`는 XOR입니다. 예를 들어 숫자 2(`0010`)를 입력하면 `a`, `b`, `d`, `e`, `g`가 켜집니다.
+
+```c
+bool a = !(!A && !C && !(B && D) && !(!B && !D));
+bool b = !(!A && B && (C ^ D));
+bool c = !(!(A) && !(B) && C && !(D));
+bool d = A || (C && !B) || (C && !D) || (!B && !D) || (B && D && !C);
+bool e = (A && B) || (A && C) || (C && !D) || (!B && !D);
+bool f = !(!A && !B && (C || D));
+bool g = A || (B && !C) || (C && !B) || (C && !D);
+```
+
+아래 회로도는 [구현 발표 PDF](docs/presentation.pdf) 3쪽에서 가져왔습니다. 왼쪽의 `A`~`D`가 입력이고 오른쪽의 `a`~`g`가 출력입니다.
+
+![4비트 입력 A~D를 세그먼트 출력 a~g로 변환하는 논리 게이트 회로도](docs/segment-circuit.png)
+
 ## 프로젝트 자료
 
 | 파일 | 내용 |
